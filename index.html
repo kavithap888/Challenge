@@ -4,113 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gujarat Restaurant Dashboard</title>
-  <!-- React & ReactDOM via CDN -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Babel to allow JSX in browser (for demo) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
-    }
-    .header-bar {
-      background-color: #4caf50;
-      color: white;
-      padding: 16px;
-      text-align: center;
-    }
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    .main-content {
-      flex: 1;
-      display: flex;
-      gap: 20px;
-      padding: 20px;
-    }
-    .menu-list {
-      flex: 2;
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      overflow-y: auto;
-    }
-    .menu-list h2 {
-      margin-top: 0;
-    }
-    .menu-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ddd;
-      padding: 12px 0;
-    }
-    .menu-item .item-info h3 {
-      margin: 0;
-    }
-    .menu-item button {
-      padding: 8px 12px;
-      background: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .menu-item button:hover {
-      background: #45a049;
-    }
-    .order-summary {
-      flex: 1;
-      background: #fff;
-      border: 1px solid #ddd;
-      padding: 16px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-    }
-    .order-summary h2 {
-      margin-top: 0;
-    }
-    .order-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .order-item .buttons button {
-      padding: 4px 8px;
-      margin-left: 4px;
-      background: #ff5722;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .order-item .buttons button:hover {
-      background: #e64a19;
-    }
-    .order-total {
-      margin-top: auto;
-      font-size: 1.2em;
-      text-align: right;
-    }
-    .checkout-btn {
-      margin-top: 12px;
-      width: 100%;
-      padding: 10px;
-      background: #ff9800;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .checkout-btn:hover {
-      background: #e68a00;
-    }
+    /* Add your existing CSS styles here */
   </style>
 </head>
 <body>
@@ -151,7 +49,7 @@
       );
     }
 
-    function OrderSummary({ orderItems, addToOrder, removeFromOrder }) {
+    function OrderSummary({ orderItems, addToOrder, removeFromOrder, checkout }) {
       const total = orderItems.reduce((sum, o) => sum + o.price * o.quantity, 0);
 
       return (
@@ -171,7 +69,37 @@
           <div className="order-total">
             <strong>Total: ₹ {total}</strong>
           </div>
-          {orderItems.length > 0 && <button className="checkout-btn">Checkout</button>}
+          {orderItems.length > 0 && <button className="checkout-btn" onClick={checkout}>Checkout</button>}
+        </div>
+      );
+    }
+
+    function OrderStatus({ orders, updateOrderStatus }) {
+      return (
+        <div className="order-status">
+          <h2>Order Status & Updates</h2>
+          {orders.length === 0 && <p>No orders placed yet.</p>}
+          {orders.map(order => (
+            <div key={order.id} className="order-item">
+              <h3>Order #{order.id}</h3>
+              <ul>
+                {order.items.map(item => (
+                  <li key={item.id}>{item.name} × {item.quantity}</li>
+                ))}
+              </ul>
+              <p>Total: ₹ {order.total}</p>
+              <select
+                value={order.status}
+                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+              >
+                <option value="Placed">Placed</option>
+                <option value="Preparing">Preparing</option>
+                <option value="Ready">Ready</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          ))}
         </div>
       );
     }
@@ -185,6 +113,7 @@
       ];
 
       const [orderItems, setOrderItems] = useState([]);
+      const [placedOrders, setPlacedOrders] = useState([]);
 
       const addToOrder = (menuItem) => {
         setOrderItems(prev => {
@@ -209,6 +138,28 @@
         );
       };
 
+      const checkout = () => {
+        const orderId = Math.floor(Math.random() * 10000);
+        const total = orderItems.reduce((sum, o) => sum + o.price * o.quantity, 0);
+        const newOrder = {
+          id: orderId,
+          items: orderItems,
+          total,
+          status: 'Placed',
+        };
+        setPlacedOrders(prev => [...prev, newOrder]);
+        setOrderItems([]);
+        alert(`Order #${orderId} placed successfully!`);
+      };
+
+      const updateOrderStatus = (orderId, status) => {
+        setPlacedOrders(prev =>
+          prev.map(order =>
+            order.id === orderId ? { ...order, status } : order
+          )
+        );
+      };
+
       return (
         <div className="app-container">
           <Header title="Gujarat Restaurant Dashboard" />
@@ -218,14 +169,15 @@
               orderItems={orderItems}
               addToOrder={addToOrder}
               removeFromOrder={removeFromOrder}
+              checkout={checkout}
             />
+            <OrderStatus orders={placedOrders} updateOrderStatus={updateOrderStatus} />
           </div>
         </div>
       );
     }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
-</body>
-</html>
+    root.render(<
+::contentReference[oaicite:0]{index=0}
+ 
