@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self Love Planner Dashboard</title>
+  <style>
+    /* --- CSS --- */
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background: #ff9aa2;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    nav {
+      background: #ffb7b2;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    main {
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #b7545f;
+      margin-bottom: 15px;
+    }
+    .prompt-area, .journal-area {
+      margin-bottom: 15px;
+    }
+    .prompt-area p {
+      font-size: 1.1em;
+      margin-bottom: 8px;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+      resize: vertical;
+    }
+    button {
+      background: #ff6f69;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .tracker-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .tracker {
+      flex: 1;
+      min-width: 200px;
+    }
+    .tracker label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .tracker input[type="range"] {
+      width: 100%;
+    }
+    .peer-stories .story {
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+    }
+    .art-section input[type="file"] {
+      margin-bottom: 10px;
+    }
+    .art-preview {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Self‑Love Planner Dashboard</h1>
+  </header>
+  <nav>
+    <a href="#prompt">Daily Prompt</a>
+    <a href="#tracker">Progress Tracker</a>
+    <a href="#stories">Peer Stories</a>
+    <a href="#creative">Creative Art</a>
+  </nav>
+  <main>
+    <!-- Daily Prompt & Journaling -->
+    <section id="prompt">
+      <h2>Daily Prompt & Journaling</h2>
+      <div class="prompt-area">
+        <p id="daily-prompt">“You are enough just as you are.”</p>
+      </div>
+      <div class="journal-area">
+        <textarea id="journal-text" placeholder="Write your thoughts here..."></textarea>
+      </div>
+      <button id="save-journal-btn">Save Entry</button>
+    </section>
+
+    <!-- Progress Tracker -->
+    <section id="tracker">
+      <h2>Progress Tracker</h2>
+      <div class="tracker-group">
+        <div class="tracker">
+          <label for="wellness-range">Mental Wellness</label>
+          <input type="range" id="wellness-range" min="0" max="10" step="1" />
+          <span id="wellness-value">5</span>/10
+        </div>
+        <div class="tracker">
+          <label for="selfperception-range">Self‑Perception</label>
+          <input type="range" id="selfperception-range" min="0" max="10" step="1" />
+          <span id="selfperception-value">5</span>/10
+        </div>
+      </div>
+      <button id="save-tracker-btn">Save Progress</button>
+    </section>
+
+    <!-- Peer Stories -->
+    <section id="stories">
+      <h2>Peer Stories & Coaching</h2>
+      <div class="peer-stories" id="stories-list">
+        <!-- stories will appear here -->
+      </div>
+      <textarea id="new-story-text" placeholder="Share your journey or story..."></textarea>
+      <button id="post-story-btn">Post Your Story</button>
+    </section>
+
+    <!-- Creative / Art Expression -->
+    <section id="creative">
+      <h2>Creative Art / Expression</h2>
+      <div class="art-section">
+        <input type="file" id="art-file-input" accept="image/*" />
+        <div id="art-preview-wrapper">
+          <img id="art-preview" class="art-preview" src="" alt="" hidden />
+        </div>
+      </div>
+      <button id="save-art-btn">Save Artwork</button>
+    </section>
+  </main>
+
+  <script>
+    // --- JavaScript Logic ---
+
+    // Daily Prompt (could rotate or fetch from a list)
+    const prompts = [
+      "List three things you love about yourself today.",
+      "What challenge did you overcome recently, and how did it make you stronger?",
+      "Write a letter to your body, thanking it for what it lets you do.",
+      "Name a goal you have and affirm you deserve to achieve it.",
+      "Describe a moment when you felt proud of yourself."
+    ];
+    const promptEl = document.getElementById('daily-prompt');
+    // Choose a random prompt on load
+    promptEl.textContent = prompts[Math.floor(Math.random() * prompts.length)];
+
+    // Save journal entry (for demo, localStorage)
+    document.getElementById('save-journal-btn').onclick = () => {
+      const text = document.getElementById('journal-text').value;
+      if (!text) {
+        alert("Write something before saving.");
+        return;
+      }
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('journal_' + today, text);
+      alert("Journal saved for " + today);
+      document.getElementById('journal-text').value = '';
+    };
+
+    // Tracker sliders
+    const wellnessRange = document.getElementById('wellness-range');
+    const wellnessValue = document.getElementById('wellness-value');
+    wellnessRange.oninput = () => wellnessValue.textContent = wellnessRange.value;
+
+    const selfRange = document.getElementById('selfperception-range');
+    const selfValue = document.getElementById('selfperception-value');
+    selfRange.oninput = () => selfValue.textContent = selfRange.value;
+
+    // Save tracker values
+    document.getElementById('save-tracker-btn').onclick = () => {
+      const w = wellnessRange.value;
+      const s = selfRange.value;
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('tracker_' + today, JSON.stringify({ mental: w, self: s }));
+      alert(`Progress saved (Wellness: ${w}, Self‑Perception: ${s})`);
+    };
+
+    // Peer Stories
+    const storiesList = document.getElementById('stories-list');
+    const loadStories = () => {
+      storiesList.innerHTML = '';
+      const stored = localStorage.getItem('peer_stories');
+      let arr = stored ? JSON.parse(stored) : [];
+      arr.forEach(story => {
+        const div = document.createElement('div');
+        div.classList.add('story');
+        div.innerHTML = `<p>${story}</p>`;
+        storiesList.appendChild(div);
+      });
+    };
+    loadStories();
+
+    document.getElementById('post-story-btn').onclick = () => {
+      const txt = document.getElementById('new-story-text').value.trim();
+      if (!txt) {
+        alert("Cannot post empty story.");
+        return;
+      }
+      const stored = localStorage.getItem('peer_stories');
+      let arr = stored ? JSON.parse(stored) : [];
+      arr.unshift(txt);
+      localStorage.setItem('peer_stories', JSON.stringify(arr));
+      document.getElementById('new-story-text').value = '';
+      loadStories();
+    };
+
+    // Art / Creative
+    const artInput = document.getElementById('art-file-input');
+    const artPreview = document.getElementById('art-preview');
+
+    artInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      artPreview.src = url;
+      artPreview.hidden = false;
+    };
+
+    document.getElementById('save-art-btn').onclick = () => {
+      if (!artPreview.src) {
+        alert("No art to save.");
+        return;
+      }
+      // In a real app, upload file to server or save it.
+      alert("Artwork preview saved! (in real app, upload to server)");
+    };
+
+  </script>
+</body>
+</html>
